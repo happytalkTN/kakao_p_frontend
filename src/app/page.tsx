@@ -1,66 +1,97 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const KAKAO_CLIENT_ID = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+const KAKAO_REDIRECT_URI = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+
+const generateRandomState = (): string =>
+  Math.random().toString(36).substring(2, 15);
 
 export default function Home() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isStatusLoading, setIsStatusLoading] = useState(true);
+
+  const checkLoginStatus = async () => {
+    try {
+      await axios.get(`${BACKEND_API_URL}/auth/status`, {
+        withCredentials: true,
+      });
+      setIsLoggedIn(true);
+    } catch (error) {
+      setIsLoggedIn(false);
+    } finally {
+      setIsStatusLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      checkLoginStatus();
+    }
+  }, []);
+
+  const handleKakaoLogin = () => {
+    if (!KAKAO_CLIENT_ID || !KAKAO_REDIRECT_URI) {
+      alert("카카오 설정이 누락되었습니다.");
+      return;
+    }
+
+    const kakaoAuthUrl =
+      `https://kauth.kakao.com/oauth/authorize?` +
+      `client_id=${KAKAO_CLIENT_ID}&` +
+      `redirect_uri=${KAKAO_REDIRECT_URI}&` +
+      `response_type=code&` +
+      `state=${generateRandomState()}`;
+
+    router.push(kakaoAuthUrl);
+  };
+
+  if (isStatusLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        상태 확인 중...
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">
+          카카오 로그인 인증
+        </h1>
+
+        {isLoggedIn ? (
+          <div className="space-y-4">
+            <p className="text-lg text-green-600 font-semibold">
+              카카오 계정으로 로그인되어 있습니다.
+            </p>
+            <button
+              onClick={() => router.push("/profile")}
+              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-150"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+              프로필 정보 확인
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-gray-600 mb-4">
+              카카오 계정으로 로그인하여 인증을 시작해 주세요.
+            </p>
+            <button
+              onClick={handleKakaoLogin}
+              className="w-full flex items-center justify-center py-3 bg-[#FEE500] text-black font-bold rounded-lg hover:bg-[#ffe033] transition duration-150 shadow-md"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <span className="ml-2">카카오 로그인</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
