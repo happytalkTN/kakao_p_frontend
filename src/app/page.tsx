@@ -16,7 +16,6 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
 
-  // 현재 로그인 상태를 백엔드에 확인하고 업데이트합니다. (HttpOnly 쿠키 사용)
   const checkLoginStatus = async () => {
     try {
       await axios.get(`${BACKEND_API_URL}/auth/status`, {
@@ -31,20 +30,17 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // 브라우저 환경에서만 로그인 상태 확인 함수를 호출합니다.
     if (typeof window !== "undefined") {
       checkLoginStatus();
     }
   }, []);
 
-  // 카카오 인증 서버로 리다이렉트하여 간편 가입을 요청합니다.
   const handleKakaoLogin = () => {
     if (!KAKAO_CLIENT_ID || !KAKAO_REDIRECT_URI) {
       alert("카카오 설정이 누락되었습니다.");
       return;
     }
 
-    // 닉네임(필수)과 프로필 이미지(선택)만 요청하는 동의 항목(scope)입니다.
     const SCOPES = "profile_nickname,profile_image";
 
     const kakaoAuthUrl =
@@ -59,7 +55,6 @@ export default function Home() {
   };
 
   if (isStatusLoading) {
-    // 로그인 상태 확인 중 로딩 화면을 표시합니다.
     return (
       <div className="flex min-h-screen items-center justify-center">
         상태 확인 중...

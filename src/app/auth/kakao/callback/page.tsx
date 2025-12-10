@@ -13,23 +13,34 @@ export default function KakaoCallbackPage() {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  const handleAuthCode = useCallback(async (code: string) => {
-    if (!BACKEND_API_URL) return router.replace('/error?message=백엔드 API 설정이 누락되었습니다.');
-    
-    try {
-      await axios.post(`${BACKEND_API_URL}/auth/kakao/login`, {
-        code,
-      }, {
-        withCredentials: true, 
-      });
-      
-      router.replace('/profile');
-      
-    } catch (err) {
-      console.error('백엔드 로그인 처리 오류:', err);
-      router.replace('/error?message=로그인 처리 중 문제가 발생했습니다. 백엔드 서버 상태를 확인해 주세요.');
-    }
-  }, [router, BACKEND_API_URL]);
+  const handleAuthCode = useCallback(
+    async (code: string) => {
+      if (!BACKEND_API_URL)
+        return router.replace(
+          "/error?message=백엔드 API 설정이 누락되었습니다."
+        );
+
+      try {
+        await axios.post(
+          `${BACKEND_API_URL}/auth/kakao/login`,
+          {
+            code,
+          },
+          {
+            withCredentials: true,
+          }
+        );
+
+        router.replace("/profile");
+      } catch (err) {
+        console.error("백엔드 로그인 처리 오류:", err);
+        router.replace(
+          "/error?message=로그인 처리 중 문제가 발생했습니다. 백엔드 서버 상태를 확인해 주세요."
+        );
+      }
+    },
+    [router]
+  );
 
   useEffect(() => {
     if (error) {
