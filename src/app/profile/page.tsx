@@ -8,19 +8,18 @@ import axios from "axios";
 interface UserProfile {
   id: string;
   provider: string;
-  email: string;
   nickname: string;
   createdAt: string;
   profileImageUrl?: string;
 }
-
 interface ProfileResponse {
   message: string;
-  user: UserProfile;
+  data: UserProfile;
+  success: true;
 }
 
-const USER_API_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user/profile`;
-const LOGOUT_API_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/logout`;
+const USER_API_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/user/profile`;
+const LOGOUT_API_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/auth/logout`;
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -33,7 +32,6 @@ export default function ProfilePage() {
       alert("로그아웃되었습니다.");
       router.push("/");
     } catch (error) {
-      console.error("로그아웃 실패:", error);
       alert("로그아웃 처리 중 오류가 발생했습니다.");
     }
   };
@@ -45,9 +43,8 @@ export default function ProfilePage() {
           withCredentials: true,
         });
 
-        setUserProfile(response.data.user);
+        setUserProfile(response.data.data);
       } catch (error) {
-        console.error("프로필 정보 로드 실패:", error);
         alert(
           "인증 정보가 만료되었거나 유효하지 않습니다. 다시 로그인해주세요."
         );
@@ -88,38 +85,28 @@ export default function ProfilePage() {
               className="rounded-full object-cover shadow-lg mb-4"
               unoptimized={true}
             />
-            // ******************************************************
           )}
           <p className="text-xl font-bold text-gray-800">
             {userProfile.nickname}
-          </p>
-          <p className="text-sm text-gray-500">
-            {userProfile.email || "이메일 정보 없음"}
           </p>
         </div>
 
         <ul className="space-y-4 text-left">
           <li className="p-3 border-b">
             <span className="font-semibold w-24 inline-block text-gray-700">
-              제공자
+              제공자:
             </span>
             <span className="text-indigo-500">{userProfile.provider}</span>
           </li>
           <li className="p-3 border-b">
             <span className="font-semibold w-24 inline-block text-gray-700">
-              DB ID
+              DB ID:
             </span>
             <span>{userProfile.id}</span>
           </li>
-          <li className="p-3 border-b">
-            <span className="font-semibold w-24 inline-block text-gray-700">
-              이메일
-            </span>
-            <span>{userProfile.email || "제공되지 않음"}</span>
-          </li>
           <li className="p-3">
             <span className="font-semibold w-24 inline-block text-gray-700">
-              가입일
+              가입일:
             </span>
             <span>{new Date(userProfile.createdAt).toLocaleDateString()}</span>
           </li>
