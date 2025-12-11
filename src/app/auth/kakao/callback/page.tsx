@@ -22,7 +22,7 @@ export default function KakaoCallbackPage() {
 
       try {
         await axios.post(
-          `${BACKEND_API_URL}/auth/kakao/login`,
+          `${BACKEND_API_URL}/api/auth/kakao/login`,
           {
             code,
           },
@@ -33,7 +33,6 @@ export default function KakaoCallbackPage() {
 
         router.replace("/profile");
       } catch (err) {
-        console.error("백엔드 로그인 처리 오류:", err);
         router.replace(
           "/error?message=로그인 처리 중 문제가 발생했습니다. 백엔드 서버 상태를 확인해 주세요."
         );
